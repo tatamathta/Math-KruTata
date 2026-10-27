@@ -1,0 +1,64 @@
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var studentId = String(data.studentId).trim();
+    var password = String(data.password).trim();
+    
+    var sheetName = "Teacher ป.6"; 
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    var rows = sheet.getDataRange().getValues();
+    
+    var headers = rows[0]; 
+    var studentData = null;
+    
+    for (var i = 1; i < rows.length; i++) {
+      var row = rows[i];
+      var colC = String(row[2]).trim(); 
+      var colD = String(row[3]).trim(); 
+      
+      if (colC === studentId && colD === password) {
+        studentData = row;
+        break;
+      }
+    }
+    
+    if (!studentData) {
+      return ContentService.createTextOutput(JSON.stringify({status: "error", message: "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง"}))
+                 .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var fullName = studentData[4] + " " + studentData[5]; 
+    var nickname = studentData[1];
+    
+    var homeworks = [];
+    for (var j = 0; j < headers.length; j++) {
+      var headerName = String(headers[j]);
+      if (headerName.indexOf("F1/สมุด/") !== -1) {
+        var score = studentData[j];
+        var status = "🔴"; 
+        
+        if (score === 4 || score === 5 || score == "4" || score == "5") {
+          status = "🟢"; 
+        } else if (score === 3 || score == "3") {
+          status = "🟡"; 
+        }
+        
+        homeworks.push({
+          title: headerName.split("/")[2] || ("งาน " + (homeworks.length + 1)), 
+          status: status
+        });
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      fullName: fullName,
+      nickname: nickname,
+      homeworks: homeworks
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.toString()}))
+               .setMimeType(ContentService.MimeType.JSON);
+  }
+}
