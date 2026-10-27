@@ -54,7 +54,7 @@
     </div>
 
     <script>
-        // เชื่อมต่อกับ Google Apps Script Web App เรียบร้อยแล้ว
+        // เชื่อมต่อกับ Google Apps Script ของคุณครูเรียบร้อยแล้ว
         const scriptUrl = "https://script.google.com/macros/s/AKfycbxHOMgeBn38s4vjb_ox5b_H2UTl6KnOf-6DAkSs4jfW98UGe8xzyo-sy28uYjyjxZ_nYQ/exec"; 
 
         async function checkStatus() {
@@ -98,4 +98,23 @@
                     document.getElementById('result-section').classList.remove('hidden');
                 } else {
                     errorMsg.textContent = data.message || "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง";
-                    errorMsg.classList.remove('hidden
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorMsg.textContent = "เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "ตรวจสอบสถานะ";
+            }
+        }
+
+        function logout() {
+            document.getElementById('studentId').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
