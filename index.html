@@ -54,8 +54,8 @@
     </div>
 
     <script>
-        // ⚠️ สำคัญ: นำ Web App URL ของ Google Apps Script มาใส่แทนที่ข้อความในเครื่องหมายคำพูดด้านล่างนี้
-        const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"; 
+        // เชื่อมต่อกับ Google Apps Script Web App เรียบร้อยแล้ว
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbzQn3t_LgqD0Qn_1v3n2l1k0j9h8g7f6e5d4c3b2a1/exec"; 
 
         async function checkStatus() {
             const studentId = document.getElementById('studentId').value.trim();
@@ -69,4 +69,33 @@
                 return;
             }
 
-            errorMsg
+            errorMsg.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = "กำลังตรวจสอบ...";
+
+            try {
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ studentId, password })
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('res-name').textContent = data.fullName;
+                    document.getElementById('res-nickname').textContent = "ชื่อเล่น: " + data.nickname;
+                    
+                    const listContainer = document.getElementById('homework-list');
+                    listContainer.innerHTML = '';
+                    
+                    data.homeworks.forEach(hw => {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-lg text-sm";
+                        div.innerHTML = `<span class="text-slate-700 font-medium">${hw.title}</span><span class="text-lg">${hw.status}</span>`;
+                        listContainer.appendChild(div);
+                    });
+
+                    document.getElementById('login-form').classList.add('hidden');
+                    document.getElementById('result-section').classList.remove('hidden');
+                } else {
+                    errorMsg.textContent = data.message || "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง";
+                    errorMsg.classList.remove('hidden
